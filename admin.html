@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thinksharp Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #0F0F0F;
+      color: #F0F0F0;
+      min-height: 100vh;
+    }
+
+    /* ---- Header ---- */
+    header {
+      background: #1A1A1A;
+      border-bottom: 3px solid #F4D93E;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand img {
+      height: 40px;
+    }
+
+    .brand span {
+      font-size: 22px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    .brand .admin-tag {
+      font-size: 11px;
+      background: #F4D93E;
+      color: #1A1A1A;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    #userInfo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #AAA;
+    }
+
+    #signOutBtn {
+      background: transparent;
+      border: 1px solid #555;
+      color: #CCC;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    #signOutBtn:hover { border-color: #F4D93E; color: #F4D93E; }
+
+    /* ---- Login screen ---- */
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #loginScreen h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    #loginScreen p {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 15px;
+    }
+
+    #googleSignInBtn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      color: #1A1A1A;
+      border: none;
+      padding: 13px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #googleSignInBtn:hover { background: #F0F0F0; }
+
+    #googleSignInBtn img {
+      width: 22px;
+      height: 22px;
+    }
+
+    #accessDenied {
+      display: none;
+      margin-top: 20px;
+      background: #3A1A1A;
+      border: 1px solid #8B2020;
+      border-radius: 8px;
+      padding: 14px 20px;
+      color: #FF8080;
+      font-size: 14px;
+    }
+
+    /* ---- Dashboard ---- */
+    #dashboard {
+      display: none;
+      padding: 32px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #1A1A1A;
+      border: 1px solid #2A2A2A;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #F4D93E;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #CCC;
+      margin-bottom: 16px;
+    }
+
+    /* ---- Table ---- */
+    .table-wrap {
+      background: #1A1A1A;
+      border: 1px solid #2A2A2A;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead tr {
+      background: #222;
+      border-bottom: 1px solid #333;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #888;
+      font-weight: 600;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #222;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: #1F1F1F; }
+
+    td {
+      padding: 12px 16px;
+      color: #DDD;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #2A3A2A;
+      color: #7ED98A;
+      margin-right: 4px;
+    }
+
+    /* ---- Loading / empty states ---- */
+    #loadingMsg {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    #emptyMsg {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      color: #555;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <img src="bulb-icon.png" alt="Thinksharp">
+      <span>THINKSHARP</span>
+      <span class="admin-tag">ADMIN</span>
+    </div>
+    <div id="userInfo" style="display:none;">
+      <span id="userEmail"></span>
+      <button id="signOutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <!-- Login screen -->
+  <div id="loginScreen">
+    <h2>Admin Access</h2>
+    <p>Sign in with your authorised Google account to view student sign-ups.</p>
+    <button id="googleSignInBtn">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      Sign in with Google
+    </button>
+    <div id="accessDenied">
+      ⛔ Access denied. This dashboard is restricted to the Thinksharp admin account.
+    </div>
+  </div>
+
+  <!-- Dashboard (shown after successful login) -->
+  <div id="dashboard">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total sign-ups</div>
+        <div class="stat-value" id="totalCount">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Countries</div>
+        <div class="stat-value" id="countryCount">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Boards</div>
+        <div class="stat-value" id="boardCount">—</div>
+      </div>
+    </div>
+
+    <div class="section-title">All student sign-ups</div>
+    <div class="table-wrap">
+      <div id="loadingMsg">Loading students...</div>
+      <div id="emptyMsg">No sign-ups yet. Share your site link to get started!</div>
+      <table id="studentsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Country</th>
+            <th>Board</th>
+            <th>Exams</th>
+            <th>Language</th>
+            <th>Signed up</th>
+          </tr>
+        </thead>
+        <tbody id="studentsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, orderBy, query }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const ADMIN_EMAIL = 'tanuhere369@gmail.com';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCAgWaUJ-YG6pqt1rWS08qbSR59h7pF7zU",
+      authDomain: "thinksharp-fe88f.firebaseapp.com",
+      projectId: "thinksharp-fe88f",
+      storageBucket: "thinksharp-fe88f.firebasestorage.app",
+      messagingSenderId: "188360201110",
+      appId: "1:188360201110:web:f80398fa16dd5105adc3b7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ---- Sign in button ----
+    document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error('Sign in failed:', err);
+      }
+    });
+
+    // ---- Sign out button ----
+    document.getElementById('signOutBtn').addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // ---- Auth state watcher ----
+    // This fires every time login state changes
+    onAuthStateChanged(auth, async (user) => {
+      const loginScreen = document.getElementById('loginScreen');
+      const dashboard = document.getElementById('dashboard');
+      const accessDenied = document.getElementById('accessDenied');
+      const userInfo = document.getElementById('userInfo');
+
+      if (user) {
+        // Someone is logged in — check if it's actually you
+        if (user.email !== ADMIN_EMAIL) {
+          // Not your account — show denied, sign them back out
+          accessDenied.style.display = 'block';
+          await signOut(auth);
+          return;
+        }
+
+        // It's you — show the dashboard
+        loginScreen.style.display = 'none';
+        dashboard.style.display = 'block';
+        userInfo.style.display = 'flex';
+        document.getElementById('userEmail').textContent = user.email;
+        accessDenied.style.display = 'none';
+
+        // Load the students
+        await loadStudents();
+
+      } else {
+        // Nobody logged in — show the login screen
+        loginScreen.style.display = 'flex';
+        dashboard.style.display = 'none';
+        userInfo.style.display = 'none';
+      }
+    });
+
+    // ---- Load and display students ----
+    async function loadStudents() {
+      const loadingMsg = document.getElementById('loadingMsg');
+      const emptyMsg = document.getElementById('emptyMsg');
+      const table = document.getElementById('studentsTable');
+      const tbody = document.getElementById('studentsBody');
+
+      try {
+        const q = query(collection(db, 'students'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+
+        loadingMsg.style.display = 'none';
+
+        if (snapshot.empty) {
+          emptyMsg.style.display = 'block';
+          return;
+        }
+
+        const students = [];
+        snapshot.forEach(doc => students.push(doc.data()));
+
+        // Stats
+        document.getElementById('totalCount').textContent = students.length;
+        document.getElementById('countryCount').textContent =
+          new Set(students.map(s => s.country?.toLowerCase())).size;
+        document.getElementById('boardCount').textContent =
+          new Set(students.map(s => s.board)).size;
+
+        // Table rows
+        tbody.innerHTML = '';
+        students.forEach((student, i) => {
+          const date = student.createdAt?.toDate
+            ? student.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            : 'Unknown';
+
+          const exams = Array.isArray(student.exams) && student.exams.length > 0
+            ? student.exams.map(e => `<span class="pill">${e}</span>`).join('')
+            : '<span style="color:#555">None</span>';
+
+          tbody.innerHTML += `
+            <tr>
+              <td style="color:#555">${students.length - i}</td>
+              <td><strong>${student.name || '—'}</strong></td>
+              <td>${student.country || '—'}</td>
+              <td>${student.board || '—'}</td>
+              <td>${exams}</td>
+              <td>${student.language || '—'}</td>
+              <td style="color:#666">${date}</td>
+            </tr>
+          `;
+        });
+
+        table.style.display = 'table';
+
+      } catch (err) {
+        console.error('Error loading students:', err);
+        loadingMsg.textContent = 'Error loading data. Check console for details.';
+      }
+    }
+  </script>
+
+</body>
+</html>
